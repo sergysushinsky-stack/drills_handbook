@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coaching Drills Handbook</title>
+  <style>
+    :root { --bg:#0b0c10; --panel:#111319; --muted:#aab2c8; --text:#e9ecf1; --accent:#7cc4ff; --accent-2:#90f2aa; --border:#1e2430; --shadow:rgba(0,0,0,.35); }
+    @media (prefers-color-scheme: light) { :root { --bg:#f6f8fb; --panel:#fff; --muted:#556070; --text:#0e1116; --accent:#2563eb; --accent-2:#16a34a; --border:#e8edf4; --shadow:rgba(0,0,0,.08);} }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 system-ui,Segoe UI,Roboto,Ubuntu,Arial; }
+    .wrap{max-width:1100px;margin:0 auto;padding:20px;}
+    header{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--border);}
+    h1{margin:0 0 8px;font-size:28px;}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .controls input{flex:1 1 320px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);}
+    .btn{padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:var(--panel);}
+    .badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--border);color:var(--muted)}
+    .drill{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;margin:14px 0 20px;box-shadow:0 4px 12px var(--shadow)}
+    .drill h2{margin:0 0 6px;font-size:22px}
+    .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muted)}
+    .meta span{padding:4px 10px;border-radius:999px;border:1px dashed var(--border)}
+    .tags{display:inline-flex;gap:6px;flex-wrap:wrap}
+    .section{margin-top:14px;border-top:1px dashed var(--border);padding-top:12px}
+    .section h3{margin:0 0 8px;font-size:16px;color:var(--accent)}
+    .section ul,.section ol{margin:0;padding-left:18px}
+    details{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin:8px 0}
+    details>summary{cursor:pointer;font-weight:600;color:var(--accent)}
+    .video{border:1px dashed var(--border);border-radius:12px;padding:8px;margin-top:8px}
+    .yt-thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background-size:cover;background-position:center;cursor:pointer}
+    .yt-thumb::after{content:'▶';position:absolute;inset:0;display:grid;place-items:center;font-size:42px;background:rgba(0,0,0,.35);color:#fff}
+    .yt-iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}
+  
+    /* Accordion + Mobile optimizations */
+    .accordion summary { list-style: none; display: flex; gap: 10px; align-items: center; padding: 12px 8px; cursor: pointer; }
+    .accordion summary::-webkit-details-marker { display: none; }
+    .accordion .chev { margin-left: auto; transition: transform .2s ease; }
+    .accordion[open] .chev { transform: rotate(90deg); }
+    .accordion .summary-title { font-size: 18px; font-weight: 700; }
+    .accordion .summary-meta { display: flex; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: 13px; }
+
+    /* Pre/code wrapping for small screens */
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+
+    /* Touch targets + responsive spacing */
+    .btn { min-height: 44px; }
+    input[type="search"] { min-height: 44px; }
+
+    /* Mobile layout */
+    @media (max-width: 640px) {
+      .wrap { padding: 14px; }
+      h1 { font-size: 22px; }
+      .controls { gap: 8px; }
+      .controls .btn { flex: 1 1 auto; }
+      .controls input { flex-basis: 100%; }
+      .drill { padding: 10px; border-radius: 14px; }
+      .accordion .summary-title { font-size: 16px; }
+      .meta span { font-size: 12px; padding: 3px 8px; }
+    }
+  
+    /* Modal for creating a new drill */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; z-index: 50; }
+    .modal { position: fixed; inset: 0; display: none; place-items: center; z-index: 51; }
+    .modal.open, .modal-backdrop.open { display: grid; }
+    .modal-card { width: min(720px, 94vw); max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 20px 60px var(--shadow); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .modal-header h3 { margin: 0; font-size: 18px; }
+    .modal-body { padding: 12px 16px; display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    .modal-body label { font-size: 13px; color: var(--muted); }
+    .modal-body input, .modal-body textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); }
+    .modal-body textarea { min-height: 80px; }
+    .modal-actions { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); justify-content: flex-end; }
+    .btn.primary { background: linear-gradient(180deg, var(--accent), #1e6eea); color: white; border: none; }
+    .btn.danger { background: #b91c1c; color: #fff; border: none; }
+    @media (max-width:640px){ .modal-body { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header><div class="wrap"><h1>Coaching Drills Handbook</h1>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search drills… (Ctrl/Cmd+K)"/>
+      <button class="btn" id="expandAll">Expand all</button>
+      <button class="btn" id="collapseAll">Collapse all</button>
+      <button class="btn" id="printBtn">Export / Print</button>
+      <span class="badge" id="countBadge">0 drills</span>
+      <button class="btn" id="newDrillBtn">New drill</button>
+      <button class="btn" id="downloadBtn" title="Download this handbook as HTML">Download</button>
+    </div></div></header>
+  <main class="wrap">
+
+    <article class="drill" data-collapsible>
+      <h2>High‑Intensity One‑Touch Combination (Huddersfield Town FC)</h2>
+      <div class="meta">
+        <span>Players: 5</span>
+        <span>Duration: 00:15:00</span>
+        <span class="tags"></span>
+      </div>
+      <section class="section"><h3>Objective</h3><p>Passing & Receiving</p></section>
+      <section class="section"><h3>Setup</h3><pre>Use a square grid of ~15 × 15 metres (adjust to space available)
+Form a square with cones at the four corners (A, B, C, D).
+Create a neutral “middle” zone or add a few extra markers for movement channels.
+Position players at each corner, and rotate through a queue.</pre></section>
+      <section class="section"><h3>How it works</h3><pre>Player at A has the ball and passes one-touch to B.
+B returns a one-touch pass back to A.
+A then plays to C (diagonal), who returns one-touch to B.
+The sequence continues with a diagonal to D, then returning, etc., possibly following a “give‑and‑go” or creating triangles.
+After passing, each player moves to a new corner (rotates) to keep dynamics flowing.
+Encourage movement into space between passes—players shouldn’t stand still.
+Aim: Keep the ball moving quickly, encourage scanning, communication, and accurate passing under pressure.</pre></section>
+      <section class="section"><h3>Coaching points</h3>
+        <details open><summary>Key cues</summary><pre>Accuracy: One-touch passes must be firm, directed, and towards the next receiving area.
+Head Up: Encourage players to scan before receiving, to know where the pass is going.
+Open Body Shape: Receive and pass with body positioned for the next action.
+Movement: Don’t stand still—rotate quickly and support the ball.
+Tempo: Emphasise quick play while keeping good technique.
+Communication: Use signals or words like “here,” “pass,” or “go ahead.”</pre></details>
+        <details><summary>Constraints & progressions</summary><pre>Two-touch Start: Allow two touches initially for technique, then progress to one-touch only.
+Add a Defender: Introduce a passive defender in the middle to increase pressure and decision-making.
+Combine Passing with Dribble: After a sequence, require one player to dribble through a gate or cone before resetting .
+Reduce Grid Size: Encourage even faster play and spatial awareness.
+Add a Target Player: Pass to a neutral or fixed “target” player before continuing the sequence.</pre></details>
+      </section>
+      <section class="section"><h3>Notes</h3><p>(Facebook) Huddersfield Town FC</p></section>
+      <section class="section"><h3>Video</h3>
+        <div class="video" data-url="https://www.facebook.com/share/v/1AMBEiZ5Ra/"></div>
+      </section>
+    </article>
+
+    <article class="drill" data-collapsible>
+      <h2>Finishing Drill – Third-Man & Overlapping Runs</h2>
+      <div class="meta">
+        <span>Players: 5</span>
+        <span>Duration: 00:15:00</span>
+        <span class="tags"></span>
+      </div>
+      <section class="section"><h3>Objective</h3><p>Shooting / Finishing, Attacking</p></section>
+      <section class="section"><h3>Setup</h3><pre>Area: Half-pitch or attacking third with one large goal and a goalkeeper (if available).
+Setup:
+Place cones for starting positions: one central midfielder (A), one wide player (B), one forward (C).
+Balls start with A (midfield).</pre></section>
+      <section class="section"><h3>How it works</h3><pre>A passes forward to B (left side closer player).
+B plays a short pass inside to C (further forward teammate).
+Immediately after passing, B sprints forward towards goal, bypassing the player on his side.
+C plays a long through pass into the path of B.
+B controls and finishes on goal.
+After laying the ball off, A moves up to take B’s starting position (rotation).
+Next repetition goes to the right-side , swapping roles of B and C on that side.
+Aim: Work on combination play, timing runs, accurate long passing, and composed finishing.</pre></section>
+      <section class="section"><h3>Coaching points</h3>
+        <details open><summary>Key cues</summary><pre>Pass firmly and accurately to set up the next action.
+B’s run: Explode forward right after laying off.
+C’s pass: Weighted correctly into B’s path (not too short, not overhit).
+Finishing: Calm, composed, pick your spot.
+Rotation: Players must move into the next role quickly.
+Encourage communication (“go,” “through,” “mine”).</pre></details>
+        <details><summary>Constraints & progressions</summary><pre>Add defender(s) to apply passive then active pressure.
+Restrict finishing (weaker foot, one-touch).
+Turn it into a competition (e.g., which group scores 5 first).
+Add a wide cross option for variety.</pre></details>
+      </section>
+      <section class="section"><h3>Notes</h3><p>Ad Football Training Videos (Facebook reels)</p></section>
+      <section class="section"><h3>Video</h3>
+        <div class="video" data-url="https://www.facebook.com/share/r/1CvydLgoYy/?mibextid=wwXIfr"></div>
+      </section>
+    </article>
+
+  
+
+    <!-- New Drill Modal -->
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal" id="newDrillModal" role="dialog" aria-modal="true" aria-labelledby="newDrillTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="newDrillTitle">Create New Drill</h3>
+          <button class="btn" id="closeModalBtn">Close</button>
+        </div>
+        <form id="newDrillForm">
+          <div class="modal-body">
+            <div>
+              <label>Title</label>
+              <input name="Title" required placeholder="e.g., 3v2 Transition to Goal" />
+            </div>
+            <div>
+              <label>Tags / Drill Type</label>
+              <input name="Tags" placeholder="e.g., Finishing, Transition" />
+            </div>
+            <div>
+              <label>Players</label>
+              <input name="Players" placeholder="e.g., 8–12" />
+            </div>
+            <div>
+              <label>Duration</label>
+              <input name="Duration" placeholder="e.g., 15–20 min" />
+            </div>
+            <div style="grid-column:1 / -1">
+              <label>Objective</label>
+              <textarea name="Objective" placeholder="Learning goal..."></textarea>
+            </div>
+            <div style="grid-column:1 / -1">
+              <label>Setup (bullets or lines)</label>
+              <textarea name="Setup" placeholder="List equipment, area, positions..."></textarea>
+            </div>
+            <div style="grid-column:1 / -1">
+              <label>How it works (steps)</label>
+              <textarea name="HowItWorks" placeholder="Step-by-step sequence..."></textarea>
+            </div>
+            <div>
+              <label>Key cues</label>
+              <textarea name="KeyCues" placeholder="Coaching cues..."></textarea>
+            </div>
+            <div>
+              <label>Common errors</label>
+              <textarea name="CommonErrors" placeholder="Typical mistakes..."></textarea>
+            </div>
+            <div style="grid-column:1 / -1">
+              <label>Constraints & progressions</label>
+              <textarea name="ConstraintsProgressions" placeholder="Rules, variations, progressions..."></textarea>
+            </div>
+            <div style="grid-column:1 / -1">
+              <label>Notes</label>
+              <textarea name="Notes" placeholder="Session flow, scaling, safety..."></textarea>
+            </div>
+            <div style="grid-column:1 / -1">
+              <label>Video URL (YouTube or Facebook)</label>
+              <input name="VideoURL" placeholder="https://..." />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn" id="resetFormBtn">Reset</button>
+            <button type="submit" class="btn primary">Add Drill</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+  <script>
+    const drills=[...document.querySelectorAll('.drill')];const countBadge=document.getElementById('countBadge');
+    function updateCount(){const v=drills.filter(d=>d.style.display!=='none').length;countBadge.textContent=v+(v===1?' drill':' drills');}
+
+    function getYouTubeId(u){if(!u)return null;let m=u.match(/youtu.be\/([^?&#]+)/);if(m)return m[1];m=u.match(/[?&]v=([^&#]+)/);if(m)return m[1];m=u.match(/shorts\/([^?&#]+)/);if(m)return m[1];return null;}
+
+    function renderVideo(div){const url=div.dataset.url;if(!url)return;const ytId=getYouTubeId(url);
+      if(ytId){ // YouTube thumbnail preview
+        const thumb=document.createElement('div');thumb.className='yt-thumb';thumb.style.backgroundImage=`url(https://i.ytimg.com/vi/${ytId}/hqdefault.jpg)`;
+        thumb.onclick=()=>{const f=document.createElement('iframe');f.className='yt-iframe';f.src=`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`;f.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture;web-share';f.allowFullscreen=true;thumb.replaceWith(f);};
+        div.appendChild(thumb);
+      } else if(url.includes('facebook.com')){ // Facebook direct embed
+        const iframe=document.createElement('iframe');
+        iframe.className='yt-iframe';
+        iframe.src=`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=500`;
+        iframe.allowFullscreen=true;
+        div.appendChild(iframe);
+      } else {
+        const a=document.createElement('a');a.href=url;a.textContent=url;div.appendChild(a);
+      }
+    }
+
+    document.querySelectorAll('.video').forEach(renderVideo);
+
+    document.getElementById('expandAll').onclick=()=>document.querySelectorAll('details').forEach(d=>d.open=true);
+    document.getElementById('collapseAll').onclick=()=>document.querySelectorAll('details').forEach(d=>d.open=false);
+    document.getElementById('printBtn').onclick=()=>window.print();
+    updateCount();
+
+    // --- Modal controls ---
+    const modal = document.getElementById('newDrillModal');
+    const backdrop = document.getElementById('modalBackdrop');
+    function openModal(){ modal.classList.add('open'); backdrop.classList.add('open'); setTimeout(()=>document.querySelector('#newDrillForm [name=Title]').focus(), 0); }
+    function closeModal(){ modal.classList.remove('open'); backdrop.classList.remove('open'); }
+    document.getElementById('newDrillBtn').onclick=openModal;
+    document.getElementById('closeModalBtn').onclick=closeModal;
+    backdrop.onclick=closeModal;
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+    // --- Download current HTML ---
+    document.getElementById('downloadBtn').onclick = () => {
+      const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Coaching_Drills_Handbook.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    // --- Helper: build a details.accordion from form data ---
+    function textToPre(text){ const pre=document.createElement('pre'); pre.textContent=(text||'').trim(); return pre; }
+    function buildAccordionDrill(d){
+      const details = document.createElement('details');
+      details.className = 'accordion drill';
+      details.open = true;
+      const summary = document.createElement('summary');
+      const titleEl = document.createElement('span'); titleEl.className='summary-title'; titleEl.textContent = d.Title || 'New Drill';
+      const metaWrap = document.createElement('span'); metaWrap.className='summary-meta';
+      const p = document.createElement('span'); p.textContent = (d.Players||'').trim() ? `Players: ${d.Players}` : '';
+      const dur = document.createElement('span'); dur.textContent = (d.Duration||'').trim() ? `Duration: ${d.Duration}` : '';
+      const tags = document.createElement('span'); tags.className='tags'; tags.textContent = (d.Tags||'').trim();
+      [p,dur,tags].forEach(x=>{ if(x.textContent) { x.style.padding='4px 10px'; x.style.border='1px dashed var(--border)'; x.style.borderRadius='999px'; metaWrap.appendChild(x);} });
+      const chev = document.createElement('span'); chev.className='chev'; chev.textContent = (tags.textContent || 'General Drill') + ' ›';
+      summary.appendChild(titleEl); summary.appendChild(metaWrap); summary.appendChild(chev);
+      details.appendChild(summary);
+
+      // Sections
+      const sec = (title, body) => { const s=document.createElement('section'); s.className='section'; const h=document.createElement('h3'); h.textContent=title; s.appendChild(h); s.appendChild(body); return s; };
+      if(d.Objective) details.appendChild(sec('Objective', document.createTextNode(d.Objective)));
+      if(d.Setup) details.appendChild(sec('Setup', textToPre(d.Setup)));
+      if(d.HowItWorks) details.appendChild(sec('How it works', textToPre(d.HowItWorks)));
+
+      const coaching = document.createElement('section'); coaching.className='section';
+      const hcp = document.createElement('h3'); hcp.textContent='Coaching points'; coaching.appendChild(hcp);
+      if(d.KeyCues){ const det=document.createElement('details'); det.open=true; const sum=document.createElement('summary'); sum.textContent='Key cues'; det.appendChild(sum); det.appendChild(textToPre(d.KeyCues)); coaching.appendChild(det); }
+      if(d.CommonErrors){ const det=document.createElement('details'); const sum=document.createElement('summary'); sum.textContent='Common errors'; det.appendChild(sum); det.appendChild(textToPre(d.CommonErrors)); coaching.appendChild(det); }
+      if(d.ConstraintsProgressions){ const det=document.createElement('details'); const sum=document.createElement('summary'); sum.textContent='Constraints & progressions'; det.appendChild(sum); det.appendChild(textToPre(d.ConstraintsProgressions)); coaching.appendChild(det); }
+      if(coaching.children.length>1) details.appendChild(coaching);
+
+      if(d.Notes) details.appendChild(sec('Notes', document.createTextNode(d.Notes)));
+
+      if(d.VideoURL){ const vsec=sec('Video', document.createElement('div')); const vdiv=document.createElement('div'); vdiv.className='video'; vdiv.dataset.url=d.VideoURL; vsec.lastChild.appendChild(vdiv); details.appendChild(vsec); renderVideo(vdiv); }
+
+      return details;
+    }
+
+    // --- Handle form submit ---
+    const form = document.getElementById('newDrillForm');
+    document.getElementById('resetFormBtn').onclick = () => form.reset();
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      const details = buildAccordionDrill(data);
+      document.querySelector('main.wrap').appendChild(details);
+      closeModal();
+      form.reset();
+      updateCount();
+    };
+
+
+    // Transform each .drill into an accessible <details> accordion
+    (function makeAccordions(){
+      const articles = Array.from(document.querySelectorAll('.drill[data-collapsible]'));
+      articles.forEach((art, idx) => {
+        const title = art.querySelector('h2');
+        const meta = art.querySelector('.meta');
+        const sections = Array.from(art.querySelectorAll(':scope > .section'));
+        // Build details
+        const details = document.createElement('details');
+        details.className = 'accordion drill';
+        if (idx === 0) details.open = true; // open first by default
+        const summary = document.createElement('summary');
+        const titleEl = document.createElement('span');
+        titleEl.className = 'summary-title';
+        titleEl.textContent = title ? title.textContent : 'Drill';
+        const metaWrap = document.createElement('span');
+        metaWrap.className = 'summary-meta';
+        if (meta) metaWrap.innerHTML = meta.innerHTML;
+        const chev = document.createElement('span');
+        chev.className = 'chev';
+        // Add drill type if available from meta tags
+        const typeEl = metaWrap.querySelector('.tags');
+        let typeTxt = (typeEl && typeEl.textContent.trim()) ? typeEl.textContent.trim() : 'General Drill';
+        chev.textContent = typeTxt + ' ›';
+        summary.appendChild(titleEl);
+        summary.appendChild(metaWrap);
+        summary.appendChild(chev);
+        details.appendChild(summary);
+        // Move sections inside details
+        sections.forEach(s => details.appendChild(s));
+        // Replace article
+        art.replaceWith(details);
+      });
+    })();
+
+    // Render videos (YouTube thumb or Facebook iframe)
+    document.querySelectorAll('.video').forEach(renderVideo);
+
+    // Update Expand/Collapse buttons to target top-level accordions
+    document.getElementById('expandAll').onclick = () => document.querySelectorAll('details.accordion').forEach(d => d.open = true);
+    document.getElementById('collapseAll').onclick = () => document.querySelectorAll('details.accordion').forEach(d => d.open = false);
+  </script>
+</body>
+</html>
